@@ -33,15 +33,415 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Bronze')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Parametrized",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"account_name": "financialdatalakeproject",
+						"container_name": "bronze"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "bronze"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Parametrized')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_OnPrem_Raw')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPrem_FileSystem",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": "Financial Distress.csv"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Company",
+						"type": "String"
+					},
+					{
+						"name": "Time",
+						"type": "String"
+					},
+					{
+						"name": "Financial Distress",
+						"type": "String"
+					},
+					{
+						"name": "x1",
+						"type": "String"
+					},
+					{
+						"name": "x2",
+						"type": "String"
+					},
+					{
+						"name": "x3",
+						"type": "String"
+					},
+					{
+						"name": "x4",
+						"type": "String"
+					},
+					{
+						"name": "x5",
+						"type": "String"
+					},
+					{
+						"name": "x6",
+						"type": "String"
+					},
+					{
+						"name": "x7",
+						"type": "String"
+					},
+					{
+						"name": "x8",
+						"type": "String"
+					},
+					{
+						"name": "x9",
+						"type": "String"
+					},
+					{
+						"name": "x10",
+						"type": "String"
+					},
+					{
+						"name": "x11",
+						"type": "String"
+					},
+					{
+						"name": "x12",
+						"type": "String"
+					},
+					{
+						"name": "x13",
+						"type": "String"
+					},
+					{
+						"name": "x14",
+						"type": "String"
+					},
+					{
+						"name": "x15",
+						"type": "String"
+					},
+					{
+						"name": "x16",
+						"type": "String"
+					},
+					{
+						"name": "x17",
+						"type": "String"
+					},
+					{
+						"name": "x18",
+						"type": "String"
+					},
+					{
+						"name": "x19",
+						"type": "String"
+					},
+					{
+						"name": "x20",
+						"type": "String"
+					},
+					{
+						"name": "x21",
+						"type": "String"
+					},
+					{
+						"name": "x22",
+						"type": "String"
+					},
+					{
+						"name": "x23",
+						"type": "String"
+					},
+					{
+						"name": "x24",
+						"type": "String"
+					},
+					{
+						"name": "x25",
+						"type": "String"
+					},
+					{
+						"name": "x26",
+						"type": "String"
+					},
+					{
+						"name": "x27",
+						"type": "String"
+					},
+					{
+						"name": "x28",
+						"type": "String"
+					},
+					{
+						"name": "x29",
+						"type": "String"
+					},
+					{
+						"name": "x30",
+						"type": "String"
+					},
+					{
+						"name": "x31",
+						"type": "String"
+					},
+					{
+						"name": "x32",
+						"type": "String"
+					},
+					{
+						"name": "x33",
+						"type": "String"
+					},
+					{
+						"name": "x34",
+						"type": "String"
+					},
+					{
+						"name": "x35",
+						"type": "String"
+					},
+					{
+						"name": "x36",
+						"type": "String"
+					},
+					{
+						"name": "x37",
+						"type": "String"
+					},
+					{
+						"name": "x38",
+						"type": "String"
+					},
+					{
+						"name": "x39",
+						"type": "String"
+					},
+					{
+						"name": "x40",
+						"type": "String"
+					},
+					{
+						"name": "x41",
+						"type": "String"
+					},
+					{
+						"name": "x42",
+						"type": "String"
+					},
+					{
+						"name": "x43",
+						"type": "String"
+					},
+					{
+						"name": "x44",
+						"type": "String"
+					},
+					{
+						"name": "x45",
+						"type": "String"
+					},
+					{
+						"name": "x46",
+						"type": "String"
+					},
+					{
+						"name": "x47",
+						"type": "String"
+					},
+					{
+						"name": "x48",
+						"type": "String"
+					},
+					{
+						"name": "x49",
+						"type": "String"
+					},
+					{
+						"name": "x50",
+						"type": "String"
+					},
+					{
+						"name": "x51",
+						"type": "String"
+					},
+					{
+						"name": "x52",
+						"type": "String"
+					},
+					{
+						"name": "x53",
+						"type": "String"
+					},
+					{
+						"name": "x54",
+						"type": "String"
+					},
+					{
+						"name": "x55",
+						"type": "String"
+					},
+					{
+						"name": "x56",
+						"type": "String"
+					},
+					{
+						"name": "x57",
+						"type": "String"
+					},
+					{
+						"name": "x58",
+						"type": "String"
+					},
+					{
+						"name": "x59",
+						"type": "String"
+					},
+					{
+						"name": "x60",
+						"type": "String"
+					},
+					{
+						"name": "x61",
+						"type": "String"
+					},
+					{
+						"name": "x62",
+						"type": "String"
+					},
+					{
+						"name": "x63",
+						"type": "String"
+					},
+					{
+						"name": "x64",
+						"type": "String"
+					},
+					{
+						"name": "x65",
+						"type": "String"
+					},
+					{
+						"name": "x66",
+						"type": "String"
+					},
+					{
+						"name": "x67",
+						"type": "String"
+					},
+					{
+						"name": "x68",
+						"type": "String"
+					},
+					{
+						"name": "x69",
+						"type": "String"
+					},
+					{
+						"name": "x70",
+						"type": "String"
+					},
+					{
+						"name": "x71",
+						"type": "String"
+					},
+					{
+						"name": "x72",
+						"type": "String"
+					},
+					{
+						"name": "x73",
+						"type": "String"
+					},
+					{
+						"name": "x74",
+						"type": "String"
+					},
+					{
+						"name": "x75",
+						"type": "String"
+					},
+					{
+						"name": "x76",
+						"type": "String"
+					},
+					{
+						"name": "x77",
+						"type": "String"
+					},
+					{
+						"name": "x78",
+						"type": "String"
+					},
+					{
+						"name": "x79",
+						"type": "String"
+					},
+					{
+						"name": "x80",
+						"type": "String"
+					},
+					{
+						"name": "x81",
+						"type": "String"
+					},
+					{
+						"name": "x82",
+						"type": "String"
+					},
+					{
+						"name": "x83",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPrem_FileSystem')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Parametrized')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"parameters": {
 					"account_name": {
-						"type": "string"
-					},
-					"account_key": {
 						"type": "string"
 					},
 					"container_name": {
