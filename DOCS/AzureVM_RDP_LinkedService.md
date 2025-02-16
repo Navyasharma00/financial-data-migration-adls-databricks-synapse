@@ -15,6 +15,6 @@ Documents the configuration of Self-Hosted Integration Runtime (SHIR) and creati
   - **Integration Runtime:** Configured with SHIR.
 
 ## 📸 Artifacts:
-- ✅ **Linked Service Success Screenshot:** `project_artifacts/adf_linked_service_created.png`
+- - **Linked Service Success Screenshot:** ![Connection Successful](../project_artifacts/adf_linked_service_created.png)
 
 
