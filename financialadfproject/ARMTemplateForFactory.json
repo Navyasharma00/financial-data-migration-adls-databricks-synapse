@@ -1,0 +1,99 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "financialadfproject"
+		},
+		"LS_ADLS_Parametrized_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'LS_ADLS_Parametrized'"
+		},
+		"OnPrem_FileSystem_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'OnPrem_FileSystem'"
+		},
+		"LS_ADLS_Parametrized_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://financialdatalakeproject.dfs.core.windows.net/"
+		},
+		"OnPrem_FileSystem_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\10.0.0.4/onprem_simulation"
+		},
+		"OnPrem_FileSystem_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "Navyasharma"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Parametrized')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"account_name": {
+						"type": "string"
+					},
+					"account_key": {
+						"type": "string"
+					},
+					"container_name": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_Parametrized_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('LS_ADLS_Parametrized_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OnPrem_FileSystem')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('OnPrem_FileSystem_properties_typeProperties_host')]",
+					"userId": "[parameters('OnPrem_FileSystem_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('OnPrem_FileSystem_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "OnPremRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/OnPremRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OnPremRuntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "SHIR for simulating on-premises storage",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		}
+	]
+}
