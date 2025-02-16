@@ -1,0 +1,9 @@
+{
+	"name": "financialadfproject",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "bfaf15c4-10ed-43f1-9f60-1ef6b7722fd1",
+		"tenantId": "03c6391a-f2d4-4957-b2e7-85cd062d0ef1"
+	}
+}

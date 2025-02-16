@@ -1,0 +1,7 @@
+{
+	"name": "OnPremRuntime",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "SHIR for simulating on-premises storage"
+	}
+}
