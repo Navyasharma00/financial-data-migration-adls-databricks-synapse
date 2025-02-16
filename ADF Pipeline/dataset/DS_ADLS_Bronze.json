@@ -1,0 +1,28 @@
+{
+	"name": "DS_ADLS_Bronze",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_Parametrized",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"account_name": "financialdatalakeproject",
+				"container_name": "bronze"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "@dataset().file_name",
+				"folderPath": "@dataset().folder_name",
+				"fileSystem": "bronze"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
