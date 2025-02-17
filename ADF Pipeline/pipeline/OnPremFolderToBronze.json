@@ -78,7 +78,7 @@
 							"type": "FileServerReadSettings",
 							"recursive": true,
 							"wildcardFolderPath": {
-								"value": "@concat(pipeline().parameters.source_folder, '/')",
+								"value": "@pipeline().parameters.source_folder",
 								"type": "Expression"
 							},
 							"wildcardFileName": "@pipeline().parameters.file_name",
