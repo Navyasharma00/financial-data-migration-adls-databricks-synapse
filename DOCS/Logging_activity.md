@@ -43,6 +43,10 @@ Implement a logging mechanism to capture pipeline metadata (Run ID, Status, File
 - **Error:** `Repository rule violations (secret detected)` on GitHub commit.  
   **Solution:** Removed sensitive keys from commit and used environment variables.
 
+  ---
+  
+### 📸 Screenshots of Status:
+- **Dedug Status in ADF:** ![Debug Status of Pipeline](../project_artifacts/debug_successful.png)
 
 
 
