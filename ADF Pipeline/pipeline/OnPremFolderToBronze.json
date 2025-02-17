@@ -66,7 +66,17 @@
 				"outputs": [
 					{
 						"referenceName": "DS_ADLS_Bronze",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"target_container": {
+								"value": "@pipeline().parameters.target_container\n",
+								"type": "Expression"
+							},
+							"target_path": {
+								"value": "@pipeline().parameters.target_path\n",
+								"type": "Expression"
+							}
+						}
 					}
 				]
 			},
@@ -116,6 +126,66 @@
 					"value": {
 						"value": "@activity('Get_File_Count_OnPrem').output.itemName\n\n\n",
 						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Web_Failure_LogicApp",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Copy_Folder_OnPrem_To_ADLS",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.01:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"headers": {
+						"Content-type": "Application/JSON"
+					},
+					"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
+					"body": {
+						"status": "Failed"
+					}
+				}
+			},
+			{
+				"name": "Web_Success_LogicApp",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Copy_Folder_OnPrem_To_ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.01:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"headers": {
+						"Content-type": "Application/JSON"
+					},
+					"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
+					"body": {
+						"status": "Success"
 					}
 				}
 			}
