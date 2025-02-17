@@ -46,7 +46,7 @@ Implement a logging mechanism to capture pipeline metadata (Run ID, Status, File
   ---
   
 ### 📸 Screenshots of Status:
-- **Dedug Status in ADF:** ![Debug Status of Pipeline](../project_artifacts/debug_successful.png)
+- **Dedug Status in ADF:** ![Debug Status of Pipeline](../project_artifacts/pipeline_logging_successful.png)
 
 
 
