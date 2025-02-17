@@ -5,8 +5,8 @@
 			"referenceName": "LS_ADLS_Parametrized",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"account_name": "@linkedService().account_name",
-				"container_name": "@linkedService().container_name"
+				"account_name": "@dataset().target_container",
+				"container_name": "@dataset().target_path"
 			}
 		},
 		"parameters": {
