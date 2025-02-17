@@ -1,0 +1,31 @@
+{
+	"name": "DS_OnPrem_Raw",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "OnPrem_FileSystem",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"source_folder": {
+				"type": "string"
+			},
+			"file_name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"fileName": "@dataset().file_name",
+				"folderPath": "@dataset().source_folder"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
