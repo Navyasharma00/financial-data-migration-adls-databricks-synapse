@@ -18,8 +18,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "FileServerLocation",
-				"fileName": "@dataset().file_name",
-				"folderPath": "@dataset().source_folder"
+				"fileName": "@dataset().file_name"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
