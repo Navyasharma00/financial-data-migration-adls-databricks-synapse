@@ -1,0 +1,212 @@
+{
+	"name": "OnPremFolderToBronze",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get_File_Count_OnPrem",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_OnPrem_Raw",
+						"type": "DatasetReference",
+						"parameters": {
+							"source_folder": "@pipeline().parameters.source_folder",
+							"file_name": "@pipeline().parameters.file_name"
+						}
+					},
+					"fieldList": [
+						"itemName"
+					],
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Append_File_Count",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Get_File_Count_OnPrem",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "varFileCount",
+					"value": "@activity('Get_File_Count_OnPrem').output.itemName"
+				}
+			},
+			{
+				"name": "Copy_Folder_OnPrem_To_ADLS",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Append_File_Count",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "FileServerReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_OnPrem_Raw",
+						"type": "DatasetReference",
+						"parameters": {
+							"source_folder": "@pipeline().parameters.source_folder",
+							"file_name": "@pipeline().parameters.file_name"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ADLS_Bronze",
+						"type": "DatasetReference",
+						"parameters": {
+							"target_container": "@pipeline().parameters.target_container",
+							"target_path": "@pipeline().parameters.target_path"
+						}
+					}
+				]
+			},
+			{
+				"name": "Web_Success_LogicApp",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Copy_Folder_OnPrem_To_ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
+					"body": {
+						"status": "Success"
+					}
+				}
+			},
+			{
+				"name": "Web_Failure_LogicApp",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Copy_Folder_OnPrem_To_ADLS",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
+					"body": {
+						"status": "Failed"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_folder": {
+				"type": "string",
+				"defaultValue": "onprem_simulation"
+			},
+			"file_name": {
+				"type": "string",
+				"defaultValue": "*.csv"
+			},
+			"target_container": {
+				"type": "string",
+				"defaultValue": "bronze"
+			},
+			"target_path": {
+				"type": "string",
+				"defaultValue": "financial-data"
+			},
+			"log_path": {
+				"type": "string",
+				"defaultValue": "pipeline-logs"
+			}
+		},
+		"variables": {
+			"varFileCount": {
+				"type": "Array"
+			}
+		},
+		"annotations": []
+	}
+}
