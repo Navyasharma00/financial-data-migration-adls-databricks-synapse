@@ -17,7 +17,7 @@
 				"type": "FileServerLocation",
 				"fileName": "*.csv",
 				"folderPath": {
-					"value": "{\n  \"value\": \"@concat('', dataset().source_folder)\",\n  \"type\": \"Expression\"\n}\n",
+					"value": "\"folderPath\": {\n  \"value\": \"@dataset().source_folder\",\n  \"type\": \"Expression\"\n}\n",
 					"type": "Expression"
 				}
 			},

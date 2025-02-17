@@ -62,7 +62,7 @@
 						"referenceName": "DS_OnPrem_Raw",
 						"type": "DatasetReference",
 						"parameters": {
-							"source_folder": "onprem_simulation"
+							"source_folder": "\" \""
 						}
 					}
 				],
