@@ -77,7 +77,10 @@
 						"storeSettings": {
 							"type": "FileServerReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "@pipeline().parameters.source_folder",
+							"wildcardFolderPath": {
+								"value": "\"\"",
+								"type": "Expression"
+							},
 							"wildcardFileName": "@pipeline().parameters.file_name",
 							"enablePartitionDiscovery": false
 						},
@@ -111,7 +114,10 @@
 						"referenceName": "DS_OnPrem_Raw",
 						"type": "DatasetReference",
 						"parameters": {
-							"source_folder": "@pipeline().parameters.source_folder",
+							"source_folder": {
+								"value": "\"\"",
+								"type": "Expression"
+							},
 							"file_name": "@pipeline().parameters.file_name"
 						}
 					}
