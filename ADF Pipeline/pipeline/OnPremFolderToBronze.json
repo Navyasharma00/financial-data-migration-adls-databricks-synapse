@@ -114,7 +114,10 @@
 						"referenceName": "DS_OnPrem_Raw",
 						"type": "DatasetReference",
 						"parameters": {
-							"source_folder": "@dataset().source_folder",
+							"source_folder": {
+								"value": "@pipeline().parameters.source_folder",
+								"type": "Expression"
+							},
 							"file_name": "@pipeline().parameters.file_name"
 						}
 					}
