@@ -76,6 +76,27 @@
 			"target_path": {
 				"type": "string",
 				"defaultValue": "financial data"
+			},
+			"log_path": {
+				"type": "string",
+				"defaultValue": "/pipeline-logs"
+			}
+		},
+		"variables": {
+			"varRunID": {
+				"type": "String",
+				"defaultValue": "@pipeline().RunId"
+			},
+			"varPipelineName": {
+				"type": "String",
+				"defaultValue": "@pipeline().Pipeline"
+			},
+			"varStatus": {
+				"type": "String",
+				"defaultValue": "InProgress"
+			},
+			"varFileCount": {
+				"type": "String"
 			}
 		},
 		"annotations": []
