@@ -200,15 +200,15 @@
 		"parameters": {
 			"source_folder": {
 				"type": "string",
-				"defaultValue": "\\\\10.0.0.4/onprem_simulation"
+				"defaultValue": "\\\\10.0.0.4/"
 			},
 			"target_container": {
 				"type": "string",
-				"defaultValue": "bronze"
+				"defaultValue": "/bronze"
 			},
 			"target_path": {
 				"type": "string",
-				"defaultValue": "financial data"
+				"defaultValue": "/financial-data"
 			},
 			"log_path": {
 				"type": "string",
