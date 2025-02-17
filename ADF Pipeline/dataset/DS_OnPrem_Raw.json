@@ -16,7 +16,10 @@
 			"location": {
 				"type": "FileServerLocation",
 				"fileName": "*.csv",
-				"folderPath": "@dataset().source_folder"
+				"folderPath": {
+					"value": "@dataset().source_folder",
+					"type": "Expression"
+				}
 			},
 			"columnDelimiter": ",",
 			"rowDelimiter": "\n",

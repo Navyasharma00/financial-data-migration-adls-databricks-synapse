@@ -72,11 +72,11 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"target_container": {
-								"value": "@pipeline().parameters.target_container\n",
+								"value": "@pipeline().parameters.target_container",
 								"type": "Expression"
 							},
 							"target_path": {
-								"value": "@pipeline().parameters.target_path\n",
+								"value": "@pipeline().parameters.target_path",
 								"type": "Expression"
 							}
 						}
