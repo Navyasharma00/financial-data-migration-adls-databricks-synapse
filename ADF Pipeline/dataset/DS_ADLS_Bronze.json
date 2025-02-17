@@ -1,0 +1,35 @@
+{
+	"name": "DS_ADLS_Bronze",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_Parametrized",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"account_name": "@linkedService().account_name",
+				"container_name": "@linkedService().container_name"
+			}
+		},
+		"parameters": {
+			"target_container": {
+				"type": "string"
+			},
+			"target_path": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "@dataset().target_path",
+				"fileSystem": "@dataset().target_container"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
