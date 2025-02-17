@@ -136,6 +136,9 @@
 			"log_path": {
 				"type": "string",
 				"defaultValue": "/pipeline-logs"
+			},
+			"LastModifiedDate": {
+				"type": "string"
 			}
 		},
 		"variables": {
