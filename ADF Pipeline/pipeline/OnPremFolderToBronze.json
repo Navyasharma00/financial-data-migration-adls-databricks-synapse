@@ -77,10 +77,7 @@
 						"storeSettings": {
 							"type": "FileServerReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": {
-								"value": "@pipeline().parameters.source_folder\n",
-								"type": "Expression"
-							},
+							"wildcardFolderPath": "@pipeline().parameters.source_folder",
 							"wildcardFileName": "@pipeline().parameters.file_name",
 							"enablePartitionDiscovery": false
 						},
