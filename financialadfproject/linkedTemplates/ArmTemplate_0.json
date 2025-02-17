@@ -66,17 +66,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/OnPremRuntime')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "SHIR for simulating on-premises storage",
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/LS_Logging_ADLS')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -94,6 +83,17 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/OnPremRuntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "SHIR for simulating on-premises storage",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Bronze')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -106,46 +106,37 @@
 						"container_name": "bronze"
 					}
 				},
+				"parameters": {
+					"target_container": {
+						"type": "string"
+					},
+					"target_path": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileSystem": "bronze"
+						"folderPath": {
+							"value": "@dataset().target_path",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().target_container\n",
+							"type": "Expression"
+						}
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
+					"firstRowAsHeader": false,
+					"quoteChar": null
 				},
 				"schema": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Parametrized')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OnPrem_FileSystem')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('OnPrem_FileSystem_properties_typeProperties_host')]",
-					"userId": "[parameters('OnPrem_FileSystem_properties_typeProperties_userId')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('OnPrem_FileSystem_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "OnPremRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/OnPremRuntime')]"
 			]
 		},
 		{
@@ -198,6 +189,30 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_Logging_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OnPrem_FileSystem')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('OnPrem_FileSystem_properties_typeProperties_host')]",
+					"userId": "[parameters('OnPrem_FileSystem_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('OnPrem_FileSystem_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "OnPremRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/OnPremRuntime')]"
 			]
 		},
 		{
@@ -644,7 +659,16 @@
 							{
 								"referenceName": "DS_ADLS_Bronze",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"target_container": {
+										"value": "@pipeline().parameters.target_container\n",
+										"type": "Expression"
+									},
+									"target_path": {
+										"value": "@pipeline().parameters.target_path\n",
+										"type": "Expression"
+									}
+								}
 							}
 						]
 					},
@@ -671,6 +695,7 @@
 							],
 							"storeSettings": {
 								"type": "FileServerReadSettings",
+								"recursive": true,
 								"enablePartitionDiscovery": false
 							},
 							"formatSettings": {
@@ -697,6 +722,66 @@
 								"type": "Expression"
 							}
 						}
+					},
+					{
+						"name": "Web_Failure_LogicApp",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Copy_Folder_OnPrem_To_ADLS",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.01:00:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "POST",
+							"headers": {
+								"Content-type": "Application/JSON"
+							},
+							"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
+							"body": {
+								"status": "Failed"
+							}
+						}
+					},
+					{
+						"name": "Web_Success_LogicApp",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Copy_Folder_OnPrem_To_ADLS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.01:00:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "POST",
+							"headers": {
+								"Content-type": "Application/JSON"
+							},
+							"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
+							"body": {
+								"status": "Success"
+							}
+						}
 					}
 				],
 				"policy": {
@@ -718,6 +803,9 @@
 					"log_path": {
 						"type": "string",
 						"defaultValue": "/pipeline-logs"
+					},
+					"LastModifiedDate": {
+						"type": "string"
 					}
 				},
 				"variables": {
