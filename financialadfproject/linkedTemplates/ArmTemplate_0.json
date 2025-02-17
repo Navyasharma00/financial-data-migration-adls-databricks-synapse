@@ -11,10 +11,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_ADLS_Parametrized'"
 		},
-		"LS_Logging_ADLS_accountKey": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accountKey' of 'LS_Logging_ADLS'"
-		},
 		"OnPrem_FileSystem_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'OnPrem_FileSystem'"
@@ -23,13 +19,9 @@
 			"type": "string",
 			"defaultValue": "https://financialdatalakeproject.dfs.core.windows.net/"
 		},
-		"LS_Logging_ADLS_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://financialdatalakeproject.dfs.core.windows.net/"
-		},
 		"OnPrem_FileSystem_properties_typeProperties_host": {
 			"type": "string",
-			"defaultValue": "\\\\10.0.0.4/onprem_simulation"
+			"defaultValue": "//10.0.0.4\\onprem_simulation"
 		},
 		"OnPrem_FileSystem_properties_typeProperties_userId": {
 			"type": "string",
@@ -40,6 +32,17 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/OnPremRuntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "SHIR for simulating on-premises storage",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Parametrized')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -64,86 +67,6 @@
 				}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_Logging_ADLS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('LS_Logging_ADLS_properties_typeProperties_url')]",
-					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('LS_Logging_ADLS_accountKey')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OnPremRuntime')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "SHIR for simulating on-premises storage",
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_Pipeline_Logs')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_Logging_ADLS",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileSystem": "pipeline-logs"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "pipeline_name",
-						"type": "String"
-					},
-					{
-						"name": "run_id",
-						"type": "String"
-					},
-					{
-						"name": "status",
-						"type": "String"
-					},
-					{
-						"name": "start_time",
-						"type": "String"
-					},
-					{
-						"name": "end_time",
-						"type": "String"
-					},
-					{
-						"name": "error_message",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_Logging_ADLS')]"
-			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/OnPrem_FileSystem')]",
@@ -178,8 +101,8 @@
 					"referenceName": "LS_ADLS_Parametrized",
 					"type": "LinkedServiceReference",
 					"parameters": {
-						"account_name": "financialdatalakeproject",
-						"container_name": "bronze"
+						"account_name": "@dataset().target_container",
+						"container_name": "@dataset().target_path"
 					}
 				},
 				"parameters": {
@@ -195,19 +118,13 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": {
-							"value": "@dataset().target_path",
-							"type": "Expression"
-						},
-						"fileSystem": {
-							"value": "@dataset().target_container",
-							"type": "Expression"
-						}
+						"folderPath": "@dataset().target_path",
+						"fileSystem": "@dataset().target_container"
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
-					"firstRowAsHeader": false,
-					"quoteChar": null
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
 				},
 				"schema": []
 			},
@@ -226,7 +143,12 @@
 				},
 				"parameters": {
 					"source_folder": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "onprem_simulation"
+					},
+					"file_name": {
+						"type": "string",
+						"defaultValue": "*.csv"
 					}
 				},
 				"annotations": [],
@@ -234,364 +156,14 @@
 				"typeProperties": {
 					"location": {
 						"type": "FileServerLocation",
-						"fileName": "*.csv",
-						"folderPath": {
-							"value": "@dataset().source_folder",
-							"type": "Expression"
-						}
+						"fileName": "@dataset().file_name"
 					},
 					"columnDelimiter": ",",
-					"rowDelimiter": "\n",
 					"escapeChar": "\\",
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
-				"schema": [
-					{
-						"name": "Company",
-						"type": "String"
-					},
-					{
-						"name": "Time",
-						"type": "String"
-					},
-					{
-						"name": "Financial Distress",
-						"type": "String"
-					},
-					{
-						"name": "x1",
-						"type": "String"
-					},
-					{
-						"name": "x2",
-						"type": "String"
-					},
-					{
-						"name": "x3",
-						"type": "String"
-					},
-					{
-						"name": "x4",
-						"type": "String"
-					},
-					{
-						"name": "x5",
-						"type": "String"
-					},
-					{
-						"name": "x6",
-						"type": "String"
-					},
-					{
-						"name": "x7",
-						"type": "String"
-					},
-					{
-						"name": "x8",
-						"type": "String"
-					},
-					{
-						"name": "x9",
-						"type": "String"
-					},
-					{
-						"name": "x10",
-						"type": "String"
-					},
-					{
-						"name": "x11",
-						"type": "String"
-					},
-					{
-						"name": "x12",
-						"type": "String"
-					},
-					{
-						"name": "x13",
-						"type": "String"
-					},
-					{
-						"name": "x14",
-						"type": "String"
-					},
-					{
-						"name": "x15",
-						"type": "String"
-					},
-					{
-						"name": "x16",
-						"type": "String"
-					},
-					{
-						"name": "x17",
-						"type": "String"
-					},
-					{
-						"name": "x18",
-						"type": "String"
-					},
-					{
-						"name": "x19",
-						"type": "String"
-					},
-					{
-						"name": "x20",
-						"type": "String"
-					},
-					{
-						"name": "x21",
-						"type": "String"
-					},
-					{
-						"name": "x22",
-						"type": "String"
-					},
-					{
-						"name": "x23",
-						"type": "String"
-					},
-					{
-						"name": "x24",
-						"type": "String"
-					},
-					{
-						"name": "x25",
-						"type": "String"
-					},
-					{
-						"name": "x26",
-						"type": "String"
-					},
-					{
-						"name": "x27",
-						"type": "String"
-					},
-					{
-						"name": "x28",
-						"type": "String"
-					},
-					{
-						"name": "x29",
-						"type": "String"
-					},
-					{
-						"name": "x30",
-						"type": "String"
-					},
-					{
-						"name": "x31",
-						"type": "String"
-					},
-					{
-						"name": "x32",
-						"type": "String"
-					},
-					{
-						"name": "x33",
-						"type": "String"
-					},
-					{
-						"name": "x34",
-						"type": "String"
-					},
-					{
-						"name": "x35",
-						"type": "String"
-					},
-					{
-						"name": "x36",
-						"type": "String"
-					},
-					{
-						"name": "x37",
-						"type": "String"
-					},
-					{
-						"name": "x38",
-						"type": "String"
-					},
-					{
-						"name": "x39",
-						"type": "String"
-					},
-					{
-						"name": "x40",
-						"type": "String"
-					},
-					{
-						"name": "x41",
-						"type": "String"
-					},
-					{
-						"name": "x42",
-						"type": "String"
-					},
-					{
-						"name": "x43",
-						"type": "String"
-					},
-					{
-						"name": "x44",
-						"type": "String"
-					},
-					{
-						"name": "x45",
-						"type": "String"
-					},
-					{
-						"name": "x46",
-						"type": "String"
-					},
-					{
-						"name": "x47",
-						"type": "String"
-					},
-					{
-						"name": "x48",
-						"type": "String"
-					},
-					{
-						"name": "x49",
-						"type": "String"
-					},
-					{
-						"name": "x50",
-						"type": "String"
-					},
-					{
-						"name": "x51",
-						"type": "String"
-					},
-					{
-						"name": "x52",
-						"type": "String"
-					},
-					{
-						"name": "x53",
-						"type": "String"
-					},
-					{
-						"name": "x54",
-						"type": "String"
-					},
-					{
-						"name": "x55",
-						"type": "String"
-					},
-					{
-						"name": "x56",
-						"type": "String"
-					},
-					{
-						"name": "x57",
-						"type": "String"
-					},
-					{
-						"name": "x58",
-						"type": "String"
-					},
-					{
-						"name": "x59",
-						"type": "String"
-					},
-					{
-						"name": "x60",
-						"type": "String"
-					},
-					{
-						"name": "x61",
-						"type": "String"
-					},
-					{
-						"name": "x62",
-						"type": "String"
-					},
-					{
-						"name": "x63",
-						"type": "String"
-					},
-					{
-						"name": "x64",
-						"type": "String"
-					},
-					{
-						"name": "x65",
-						"type": "String"
-					},
-					{
-						"name": "x66",
-						"type": "String"
-					},
-					{
-						"name": "x67",
-						"type": "String"
-					},
-					{
-						"name": "x68",
-						"type": "String"
-					},
-					{
-						"name": "x69",
-						"type": "String"
-					},
-					{
-						"name": "x70",
-						"type": "String"
-					},
-					{
-						"name": "x71",
-						"type": "String"
-					},
-					{
-						"name": "x72",
-						"type": "String"
-					},
-					{
-						"name": "x73",
-						"type": "String"
-					},
-					{
-						"name": "x74",
-						"type": "String"
-					},
-					{
-						"name": "x75",
-						"type": "String"
-					},
-					{
-						"name": "x76",
-						"type": "String"
-					},
-					{
-						"name": "x77",
-						"type": "String"
-					},
-					{
-						"name": "x78",
-						"type": "String"
-					},
-					{
-						"name": "x79",
-						"type": "String"
-					},
-					{
-						"name": "x80",
-						"type": "String"
-					},
-					{
-						"name": "x81",
-						"type": "String"
-					},
-					{
-						"name": "x82",
-						"type": "String"
-					},
-					{
-						"name": "x83",
-						"type": "String"
-					}
-				]
+				"schema": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/OnPrem_FileSystem')]"
@@ -603,6 +175,56 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
+					{
+						"name": "Get_File_Count_OnPrem",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_OnPrem_Raw",
+								"type": "DatasetReference",
+								"parameters": {
+									"source_folder": "@pipeline().parameters.source_folder",
+									"file_name": "@pipeline().parameters.file_name"
+								}
+							},
+							"fieldList": [
+								"itemName"
+							],
+							"storeSettings": {
+								"type": "FileServerReadSettings",
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Append_File_Count",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Get_File_Count_OnPrem",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "varFileCount",
+							"value": "@activity('Get_File_Count_OnPrem').output.itemName"
+						}
+					},
 					{
 						"name": "Copy_Folder_OnPrem_To_ADLS",
 						"type": "Copy",
@@ -628,8 +250,11 @@
 								"storeSettings": {
 									"type": "FileServerReadSettings",
 									"recursive": true,
-									"wildcardFolderPath": "onprem_simulation",
-									"wildcardFileName": "*.csv",
+									"wildcardFolderPath": {
+										"value": "@pipeline().parameters.source_folder\n",
+										"type": "Expression"
+									},
+									"wildcardFileName": "@pipeline().parameters.file_name",
 									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
@@ -639,8 +264,7 @@
 							"sink": {
 								"type": "DelimitedTextSink",
 								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings",
-									"copyBehavior": "PreserveHierarchy"
+									"type": "AzureBlobFSWriteSettings"
 								},
 								"formatSettings": {
 									"type": "DelimitedTextWriteSettings",
@@ -663,7 +287,11 @@
 								"referenceName": "DS_OnPrem_Raw",
 								"type": "DatasetReference",
 								"parameters": {
-									"source_folder": "@pipeline().parameters.source_folder"
+									"source_folder": {
+										"value": "@pipeline().parameters.source_folder",
+										"type": "Expression"
+									},
+									"file_name": "@pipeline().parameters.file_name"
 								}
 							}
 						],
@@ -672,68 +300,37 @@
 								"referenceName": "DS_ADLS_Bronze",
 								"type": "DatasetReference",
 								"parameters": {
-									"target_container": {
-										"value": "@pipeline().parameters.target_container",
-										"type": "Expression"
-									},
-									"target_path": {
-										"value": "@pipeline().parameters.target_path",
-										"type": "Expression"
-									}
+									"target_container": "@pipeline().parameters.target_container",
+									"target_path": "@pipeline().parameters.target_path"
 								}
 							}
 						]
 					},
 					{
-						"name": "Get_File_Count_OnPrem",
-						"type": "GetMetadata",
-						"dependsOn": [],
+						"name": "Web_Success_LogicApp",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Copy_Folder_OnPrem_To_ADLS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
+							"timeout": "0.01:00:00",
+							"retry": 3,
 							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"dataset": {
-								"referenceName": "DS_OnPrem_Raw",
-								"type": "DatasetReference",
-								"parameters": {
-									"source_folder": "@pipeline().parameters.source_folder"
-								}
-							},
-							"fieldList": [
-								"itemName"
-							],
-							"storeSettings": {
-								"type": "FileServerReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							},
-							"formatSettings": {
-								"type": "DelimitedTextReadSettings"
-							}
-						}
-					},
-					{
-						"name": "Append_File_Count",
-						"type": "AppendVariable",
-						"dependsOn": [
-							{
-								"activity": "Get_File_Count_OnPrem",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "varFileCount",
-							"value": {
-								"value": "@activity('Get_File_Count_OnPrem').output.itemName\n\n\n",
-								"type": "Expression"
+							"method": "POST",
+							"headers": {},
+							"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
+							"body": {
+								"status": "Success"
 							}
 						}
 					},
@@ -758,42 +355,10 @@
 						"userProperties": [],
 						"typeProperties": {
 							"method": "POST",
-							"headers": {
-								"Content-type": "Application/JSON"
-							},
+							"headers": {},
 							"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
 							"body": {
 								"status": "Failed"
-							}
-						}
-					},
-					{
-						"name": "Web_Success_LogicApp",
-						"type": "WebActivity",
-						"dependsOn": [
-							{
-								"activity": "Copy_Folder_OnPrem_To_ADLS",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.01:00:00",
-							"retry": 3,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"method": "POST",
-							"headers": {
-								"Content-type": "Application/JSON"
-							},
-							"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
-							"body": {
-								"status": "Success"
 							}
 						}
 					}
@@ -804,7 +369,11 @@
 				"parameters": {
 					"source_folder": {
 						"type": "string",
-						"defaultValue": "\\\\10.0.0.4/onprem_simulation"
+						"defaultValue": "onprem_simulation"
+					},
+					"file_name": {
+						"type": "string",
+						"defaultValue": "*.csv"
 					},
 					"target_container": {
 						"type": "string",
@@ -812,29 +381,14 @@
 					},
 					"target_path": {
 						"type": "string",
-						"defaultValue": "financial data"
+						"defaultValue": "financial-data"
 					},
 					"log_path": {
 						"type": "string",
-						"defaultValue": "/pipeline-logs"
-					},
-					"LastModifiedDate": {
-						"type": "string"
+						"defaultValue": "pipeline-logs"
 					}
 				},
 				"variables": {
-					"varRunID": {
-						"type": "String",
-						"defaultValue": "@pipeline().RunId"
-					},
-					"varPipelineName": {
-						"type": "String",
-						"defaultValue": "@pipeline().Pipeline"
-					},
-					"varStatus": {
-						"type": "String",
-						"defaultValue": "InProgress"
-					},
 					"varFileCount": {
 						"type": "Array"
 					}
