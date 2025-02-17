@@ -190,8 +190,7 @@
 		],
 		"parameters": {
 			"source_folder": {
-				"type": "string",
-				"defaultValue": "onprem_simulation"
+				"type": "string"
 			},
 			"file_name": {
 				"type": "string",
