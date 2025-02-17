@@ -60,7 +60,10 @@
 				"inputs": [
 					{
 						"referenceName": "DS_OnPrem_Raw",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"source_folder": "@pipeline().parameters.source_folder"
+						}
 					}
 				],
 				"outputs": [
