@@ -62,6 +62,48 @@
 						"type": "DatasetReference"
 					}
 				]
+			},
+			{
+				"name": "Get_File_Count_OnPrem",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_OnPrem_Raw",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"itemName"
+					],
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Append_File_Count",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Get_File_Count_OnPrem",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": []
 			}
 		],
 		"parameters": {
@@ -96,7 +138,10 @@
 				"defaultValue": "InProgress"
 			},
 			"varFileCount": {
-				"type": "String"
+				"type": "Array",
+				"defaultValue": [
+					"@length(activity('Get_File_Count_OnPrem').output.itemName)"
+				]
 			}
 		},
 		"annotations": []
