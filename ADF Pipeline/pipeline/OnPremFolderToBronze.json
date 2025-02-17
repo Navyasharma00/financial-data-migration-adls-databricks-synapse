@@ -200,7 +200,7 @@
 		"parameters": {
 			"source_folder": {
 				"type": "string",
-				"defaultValue": "\\\\10.0.0.4/"
+				"defaultValue": "\\\\10.0.0.4/onprem_simulation"
 			},
 			"target_container": {
 				"type": "string",
