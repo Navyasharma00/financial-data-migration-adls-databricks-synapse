@@ -9,16 +9,24 @@
 				"container_name": "bronze"
 			}
 		},
+		"parameters": {
+			"target_container": {
+				"type": "string"
+			},
+			"target_path": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"folderPath": {
-					"value": "@{pipeline().parameters.target_container}/@{pipeline().parameters.target_path}/@{formatDateTime(utcNow(),'yyyy-MM-dd')}\n",
+				"folderPath": "@dataset().target_path",
+				"fileSystem": {
+					"value": "@dataset().target_container\n",
 					"type": "Expression"
-				},
-				"fileSystem": "bronze"
+				}
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
