@@ -77,7 +77,10 @@
 						"storeSettings": {
 							"type": "FileServerReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "@pipeline().parameters.source_folder",
+							"wildcardFolderPath": {
+								"value": "@concat(pipeline().parameters.source_folder, '/')",
+								"type": "Expression"
+							},
 							"wildcardFileName": "@pipeline().parameters.file_name",
 							"enablePartitionDiscovery": false
 						},
@@ -137,7 +140,8 @@
 					{
 						"activity": "Copy_Folder_OnPrem_To_ADLS",
 						"dependencyConditions": [
-							"Succeeded"
+							"Succeeded",
+							"Skipped"
 						]
 					}
 				],
