@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'OnPrem_FileSystem'"
 		},
+		"LS_Logging_ADLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'LS_Logging_ADLS'"
+		},
 		"LS_ADLS_Parametrized_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://financialdatalakeproject.dfs.core.windows.net/"
@@ -26,6 +30,10 @@
 		"OnPrem_FileSystem_properties_typeProperties_userId": {
 			"type": "string",
 			"defaultValue": "Navyasharma"
+		},
+		"LS_Logging_ADLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://financialdatalakeproject.dfs.core.windows.net/"
 		},
 		"containerUri": {
 			"type": "string",
@@ -57,11 +65,17 @@
 					"LS_ADLS_Parametrized_accountKey": {
 						"value": "[parameters('LS_ADLS_Parametrized_accountKey')]"
 					},
+					"LS_Logging_ADLS_accountKey": {
+						"value": "[parameters('LS_Logging_ADLS_accountKey')]"
+					},
 					"OnPrem_FileSystem_password": {
 						"value": "[parameters('OnPrem_FileSystem_password')]"
 					},
 					"LS_ADLS_Parametrized_properties_typeProperties_url": {
 						"value": "[parameters('LS_ADLS_Parametrized_properties_typeProperties_url')]"
+					},
+					"LS_Logging_ADLS_properties_typeProperties_url": {
+						"value": "[parameters('LS_Logging_ADLS_properties_typeProperties_url')]"
 					},
 					"OnPrem_FileSystem_properties_typeProperties_host": {
 						"value": "[parameters('OnPrem_FileSystem_properties_typeProperties_host')]"

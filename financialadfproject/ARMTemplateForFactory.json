@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'OnPrem_FileSystem'"
 		},
+		"LS_Logging_ADLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'LS_Logging_ADLS'"
+		},
 		"LS_ADLS_Parametrized_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://financialdatalakeproject.dfs.core.windows.net/"
@@ -26,6 +30,10 @@
 		"OnPrem_FileSystem_properties_typeProperties_userId": {
 			"type": "string",
 			"defaultValue": "Navyasharma"
+		},
+		"LS_Logging_ADLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://financialdatalakeproject.dfs.core.windows.net/"
 		}
 	},
 	"variables": {
@@ -504,7 +512,14 @@
 					{
 						"name": "Copy_Folder_OnPrem_To_ADLS",
 						"type": "Copy",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Append_File_Count",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -563,6 +578,56 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "Get_File_Count_OnPrem",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_OnPrem_Raw",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"itemName"
+							],
+							"storeSettings": {
+								"type": "FileServerReadSettings",
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Append_File_Count",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Get_File_Count_OnPrem",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "varFileCount",
+							"value": {
+								"value": "@activity('Get_File_Count_OnPrem').output.itemName\n\n\n",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"policy": {
@@ -580,6 +645,27 @@
 					"target_path": {
 						"type": "string",
 						"defaultValue": "financial data"
+					},
+					"log_path": {
+						"type": "string",
+						"defaultValue": "/pipeline-logs"
+					}
+				},
+				"variables": {
+					"varRunID": {
+						"type": "String",
+						"defaultValue": "@pipeline().RunId"
+					},
+					"varPipelineName": {
+						"type": "String",
+						"defaultValue": "@pipeline().Pipeline"
+					},
+					"varStatus": {
+						"type": "String",
+						"defaultValue": "InProgress"
+					},
+					"varFileCount": {
+						"type": "Array"
 					}
 				},
 				"annotations": []
@@ -587,6 +673,75 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_OnPrem_Raw')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Bronze')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_Logging_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_Logging_ADLS_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('LS_Logging_ADLS_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Pipeline_Logs')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_Logging_ADLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "pipeline-logs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "pipeline_name",
+						"type": "String"
+					},
+					{
+						"name": "run_id",
+						"type": "String"
+					},
+					{
+						"name": "status",
+						"type": "String"
+					},
+					{
+						"name": "start_time",
+						"type": "String"
+					},
+					{
+						"name": "end_time",
+						"type": "String"
+					},
+					{
+						"name": "error_message",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_Logging_ADLS')]"
 			]
 		}
 	]
