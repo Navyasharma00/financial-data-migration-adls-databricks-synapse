@@ -41,249 +41,133 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/OnPremFolderToBronze')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
+			"name": "[concat(parameters('factoryName'), '/DS_Pipeline_Logs')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"activities": [
-					{
-						"name": "Copy_Folder_OnPrem_To_ADLS",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "Append_File_Count",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "FileServerReadSettings",
-									"recursive": true,
-									"wildcardFolderPath": "*.*",
-									"wildcardFileName": "*.*",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings",
-									"copyBehavior": "PreserveHierarchy"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_OnPrem_Raw",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DS_ADLS_Bronze",
-								"type": "DatasetReference",
-								"parameters": {
-									"target_container": {
-										"value": "@pipeline().parameters.target_container\n",
-										"type": "Expression"
-									},
-									"target_path": {
-										"value": "@pipeline().parameters.target_path\n",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					},
-					{
-						"name": "Get_File_Count_OnPrem",
-						"type": "GetMetadata",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "DS_OnPrem_Raw",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"fieldList": [
-								"itemName"
-							],
-							"storeSettings": {
-								"type": "FileServerReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							},
-							"formatSettings": {
-								"type": "DelimitedTextReadSettings"
-							}
-						}
-					},
-					{
-						"name": "Append_File_Count",
-						"type": "AppendVariable",
-						"dependsOn": [
-							{
-								"activity": "Get_File_Count_OnPrem",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "varFileCount",
-							"value": {
-								"value": "@activity('Get_File_Count_OnPrem').output.itemName\n\n\n",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Web_Failure_LogicApp",
-						"type": "WebActivity",
-						"dependsOn": [
-							{
-								"activity": "Copy_Folder_OnPrem_To_ADLS",
-								"dependencyConditions": [
-									"Failed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.01:00:00",
-							"retry": 3,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"method": "POST",
-							"headers": {
-								"Content-type": "Application/JSON"
-							},
-							"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
-							"body": {
-								"status": "Failed"
-							}
-						}
-					},
-					{
-						"name": "Web_Success_LogicApp",
-						"type": "WebActivity",
-						"dependsOn": [
-							{
-								"activity": "Copy_Folder_OnPrem_To_ADLS",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.01:00:00",
-							"retry": 3,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"method": "POST",
-							"headers": {
-								"Content-type": "Application/JSON"
-							},
-							"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
-							"body": {
-								"status": "Success"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
+				"linkedServiceName": {
+					"referenceName": "LS_Logging_ADLS",
+					"type": "LinkedServiceReference"
 				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "pipeline-logs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "pipeline_name",
+						"type": "String"
+					},
+					{
+						"name": "run_id",
+						"type": "String"
+					},
+					{
+						"name": "status",
+						"type": "String"
+					},
+					{
+						"name": "start_time",
+						"type": "String"
+					},
+					{
+						"name": "end_time",
+						"type": "String"
+					},
+					{
+						"name": "error_message",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_Logging_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Parametrized')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
 				"parameters": {
-					"source_folder": {
-						"type": "string",
-						"defaultValue": "\\\\10.0.0.4/onprem_simulation"
+					"account_name": {
+						"type": "string"
 					},
-					"target_container": {
-						"type": "string",
-						"defaultValue": "bronze"
-					},
-					"target_path": {
-						"type": "string",
-						"defaultValue": "financial data"
-					},
-					"log_path": {
-						"type": "string",
-						"defaultValue": "/pipeline-logs"
-					},
-					"LastModifiedDate": {
+					"container_name": {
 						"type": "string"
 					}
 				},
-				"variables": {
-					"varRunID": {
-						"type": "String",
-						"defaultValue": "@pipeline().RunId"
-					},
-					"varPipelineName": {
-						"type": "String",
-						"defaultValue": "@pipeline().Pipeline"
-					},
-					"varStatus": {
-						"type": "String",
-						"defaultValue": "InProgress"
-					},
-					"varFileCount": {
-						"type": "Array"
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_Parametrized_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('LS_ADLS_Parametrized_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_Logging_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_Logging_ADLS_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('LS_Logging_ADLS_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OnPrem_FileSystem')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('OnPrem_FileSystem_properties_typeProperties_host')]",
+					"userId": "[parameters('OnPrem_FileSystem_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('OnPrem_FileSystem_password')]"
 					}
 				},
-				"annotations": []
+				"connectVia": {
+					"referenceName": "OnPremRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_OnPrem_Raw')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Bronze')]"
+				"[concat(variables('factoryId'), '/integrationRuntimes/OnPremRuntime')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OnPremRuntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "SHIR for simulating on-premises storage",
+				"typeProperties": {}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Bronze')]",
@@ -316,7 +200,7 @@
 							"type": "Expression"
 						},
 						"fileSystem": {
-							"value": "@dataset().target_container\n",
+							"value": "@dataset().target_container",
 							"type": "Expression"
 						}
 					},
@@ -340,14 +224,24 @@
 					"referenceName": "OnPrem_FileSystem",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"source_folder": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "FileServerLocation",
-						"fileName": "Financial Distress.csv"
+						"fileName": "*.csv",
+						"folderPath": {
+							"value": "@dataset().source_folder",
+							"type": "Expression"
+						}
 					},
 					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
 					"escapeChar": "\\",
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
@@ -704,133 +598,253 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_Pipeline_Logs')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
+			"name": "[concat(parameters('factoryName'), '/OnPremFolderToBronze')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_Logging_ADLS",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileSystem": "pipeline-logs"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
+				"activities": [
 					{
-						"name": "pipeline_name",
-						"type": "String"
+						"name": "Copy_Folder_OnPrem_To_ADLS",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Append_File_Count",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "FileServerReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "onprem_simulation",
+									"wildcardFileName": "*.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "PreserveHierarchy"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_OnPrem_Raw",
+								"type": "DatasetReference",
+								"parameters": {
+									"source_folder": "@pipeline().parameters.source_folder"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ADLS_Bronze",
+								"type": "DatasetReference",
+								"parameters": {
+									"target_container": {
+										"value": "@pipeline().parameters.target_container",
+										"type": "Expression"
+									},
+									"target_path": {
+										"value": "@pipeline().parameters.target_path",
+										"type": "Expression"
+									}
+								}
+							}
+						]
 					},
 					{
-						"name": "run_id",
-						"type": "String"
+						"name": "Get_File_Count_OnPrem",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_OnPrem_Raw",
+								"type": "DatasetReference",
+								"parameters": {
+									"source_folder": "@pipeline().parameters.source_folder"
+								}
+							},
+							"fieldList": [
+								"itemName"
+							],
+							"storeSettings": {
+								"type": "FileServerReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
 					},
 					{
-						"name": "status",
-						"type": "String"
+						"name": "Append_File_Count",
+						"type": "AppendVariable",
+						"dependsOn": [
+							{
+								"activity": "Get_File_Count_OnPrem",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "varFileCount",
+							"value": {
+								"value": "@activity('Get_File_Count_OnPrem').output.itemName\n\n\n",
+								"type": "Expression"
+							}
+						}
 					},
 					{
-						"name": "start_time",
-						"type": "String"
+						"name": "Web_Failure_LogicApp",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Copy_Folder_OnPrem_To_ADLS",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.01:00:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "POST",
+							"headers": {
+								"Content-type": "Application/JSON"
+							},
+							"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
+							"body": {
+								"status": "Failed"
+							}
+						}
 					},
 					{
-						"name": "end_time",
-						"type": "String"
-					},
-					{
-						"name": "error_message",
-						"type": "String"
+						"name": "Web_Success_LogicApp",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Copy_Folder_OnPrem_To_ADLS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.01:00:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "POST",
+							"headers": {
+								"Content-type": "Application/JSON"
+							},
+							"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
+							"body": {
+								"status": "Success"
+							}
+						}
 					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_Logging_ADLS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Parametrized')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
 				"parameters": {
-					"account_name": {
-						"type": "string"
+					"source_folder": {
+						"type": "string",
+						"defaultValue": "\\\\10.0.0.4/onprem_simulation"
 					},
-					"container_name": {
+					"target_container": {
+						"type": "string",
+						"defaultValue": "bronze"
+					},
+					"target_path": {
+						"type": "string",
+						"defaultValue": "financial data"
+					},
+					"log_path": {
+						"type": "string",
+						"defaultValue": "/pipeline-logs"
+					},
+					"LastModifiedDate": {
 						"type": "string"
 					}
 				},
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('LS_ADLS_Parametrized_properties_typeProperties_url')]",
-					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('LS_ADLS_Parametrized_accountKey')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_Logging_ADLS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('LS_Logging_ADLS_properties_typeProperties_url')]",
-					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('LS_Logging_ADLS_accountKey')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OnPrem_FileSystem')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('OnPrem_FileSystem_properties_typeProperties_host')]",
-					"userId": "[parameters('OnPrem_FileSystem_properties_typeProperties_userId')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('OnPrem_FileSystem_password')]"
+				"variables": {
+					"varRunID": {
+						"type": "String",
+						"defaultValue": "@pipeline().RunId"
+					},
+					"varPipelineName": {
+						"type": "String",
+						"defaultValue": "@pipeline().Pipeline"
+					},
+					"varStatus": {
+						"type": "String",
+						"defaultValue": "InProgress"
+					},
+					"varFileCount": {
+						"type": "Array"
 					}
 				},
-				"connectVia": {
-					"referenceName": "OnPremRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
+				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/OnPremRuntime')]"
+				"[concat(variables('factoryId'), '/datasets/DS_OnPrem_Raw')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Bronze')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OnPremRuntime')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "SHIR for simulating on-premises storage",
-				"typeProperties": {}
-			},
-			"dependsOn": []
 		}
 	]
 }

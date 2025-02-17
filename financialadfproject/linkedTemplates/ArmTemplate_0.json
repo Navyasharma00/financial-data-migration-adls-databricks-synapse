@@ -94,52 +94,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Bronze')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_Parametrized",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"account_name": "financialdatalakeproject",
-						"container_name": "bronze"
-					}
-				},
-				"parameters": {
-					"target_container": {
-						"type": "string"
-					},
-					"target_path": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": {
-							"value": "@dataset().target_path",
-							"type": "Expression"
-						},
-						"fileSystem": {
-							"value": "@dataset().target_container\n",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": false,
-					"quoteChar": null
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Parametrized')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/DS_Pipeline_Logs')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -216,6 +170,52 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Bronze')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Parametrized",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"account_name": "financialdatalakeproject",
+						"container_name": "bronze"
+					}
+				},
+				"parameters": {
+					"target_container": {
+						"type": "string"
+					},
+					"target_path": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@dataset().target_path",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().target_container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": null
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Parametrized')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_OnPrem_Raw')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -224,14 +224,24 @@
 					"referenceName": "OnPrem_FileSystem",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"source_folder": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "FileServerLocation",
-						"fileName": "Financial Distress.csv"
+						"fileName": "*.csv",
+						"folderPath": {
+							"value": "@dataset().source_folder",
+							"type": "Expression"
+						}
 					},
 					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
 					"escapeChar": "\\",
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
@@ -618,8 +628,8 @@
 								"storeSettings": {
 									"type": "FileServerReadSettings",
 									"recursive": true,
-									"wildcardFolderPath": "*.*",
-									"wildcardFileName": "*.*",
+									"wildcardFolderPath": "onprem_simulation",
+									"wildcardFileName": "*.csv",
 									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
@@ -652,7 +662,9 @@
 							{
 								"referenceName": "DS_OnPrem_Raw",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"source_folder": "@pipeline().parameters.source_folder"
+								}
 							}
 						],
 						"outputs": [
@@ -661,11 +673,11 @@
 								"type": "DatasetReference",
 								"parameters": {
 									"target_container": {
-										"value": "@pipeline().parameters.target_container\n",
+										"value": "@pipeline().parameters.target_container",
 										"type": "Expression"
 									},
 									"target_path": {
-										"value": "@pipeline().parameters.target_path\n",
+										"value": "@pipeline().parameters.target_path",
 										"type": "Expression"
 									}
 								}
@@ -688,7 +700,9 @@
 							"dataset": {
 								"referenceName": "DS_OnPrem_Raw",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"source_folder": "@pipeline().parameters.source_folder"
+								}
 							},
 							"fieldList": [
 								"itemName"
