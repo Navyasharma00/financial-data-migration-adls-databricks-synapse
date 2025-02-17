@@ -28,7 +28,7 @@
 							"type": "FileServerReadSettings",
 							"recursive": true,
 							"wildcardFolderPath": "onprem_simulation",
-							"wildcardFileName": "*.*",
+							"wildcardFileName": "*.csv",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {

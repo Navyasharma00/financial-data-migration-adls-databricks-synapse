@@ -5,14 +5,21 @@
 			"referenceName": "OnPrem_FileSystem",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"source_folder": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "FileServerLocation",
-				"fileName": "Financial Distress.csv"
+				"fileName": "*.csv",
+				"folderPath": "@dataset().source_folder"
 			},
 			"columnDelimiter": ",",
+			"rowDelimiter": "\n",
 			"escapeChar": "\\",
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
