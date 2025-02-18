@@ -7,13 +7,17 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "financialadfproject"
 		},
+		"LS_ADLS_Parametrized_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'LS_ADLS_Parametrized'"
+		},
 		"OnPrem_FileSystem_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'OnPrem_FileSystem'"
 		},
-		"LS_ADLS_Parametrized_accountKey": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accountKey' of 'LS_ADLS_Parametrized'"
+		"LS_ADLS_Parametrized_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://financialdatalakeproject.dfs.core.windows.net/"
 		},
 		"OnPrem_FileSystem_properties_typeProperties_host": {
 			"type": "string",
@@ -22,10 +26,6 @@
 		"OnPrem_FileSystem_properties_typeProperties_userId": {
 			"type": "string",
 			"defaultValue": "Navyasharma"
-		},
-		"LS_ADLS_Parametrized_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://financialdatalakeproject.dfs.core.windows.net/"
 		},
 		"containerUri": {
 			"type": "string",
