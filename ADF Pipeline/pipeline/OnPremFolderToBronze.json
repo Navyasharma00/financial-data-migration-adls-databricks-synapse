@@ -82,7 +82,7 @@
 						"storeSettings": {
 							"type": "FileServerReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "{   \"value\": \"@concat('\\\\\\\\10.0.0.4\\\\onprem_simulation', '/', pipeline().parameters.source_folder)\",   \"type\": \"Expression\" }",
+							"wildcardFolderPath": "@pipeline().parameters.source_folder",
 							"wildcardFileName": {
 								"value": "@pipeline().parameters.file_name",
 								"type": "Expression"
@@ -141,6 +141,8 @@
 			{
 				"name": "Web_Success_LogicApp",
 				"type": "WebActivity",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_Folder_OnPrem_To_ADLS",
@@ -172,6 +174,8 @@
 			{
 				"name": "Web_Failure_LogicApp",
 				"type": "WebActivity",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_Folder_OnPrem_To_ADLS",
