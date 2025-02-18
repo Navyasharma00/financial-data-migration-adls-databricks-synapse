@@ -3,10 +3,14 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_ADLS_Parametrized",
-			"type": "LinkedServiceReference",
-			"parameters": {
-				"account_name": "@pipeline().parameters.account_name",
-				"container_name": "@pipeline().parameters.log_container"
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"log_path": {
+				"type": "string"
+			},
+			"log_container": {
+				"type": "string"
 			}
 		},
 		"annotations": [],
@@ -19,11 +23,11 @@
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "@pipeline().parameters.log_path",
+					"value": "@dataset().log_path",
 					"type": "Expression"
 				},
 				"fileSystem": {
-					"value": "@pipeline().parameters.log_container",
+					"value": "@dataset().log_container",
 					"type": "Expression"
 				}
 			},
