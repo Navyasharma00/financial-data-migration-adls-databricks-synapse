@@ -9,14 +9,6 @@
 				"container_name": "@pipeline().parameters.log_container"
 			}
 		},
-		"parameters": {
-			"log_container": {
-				"type": "string"
-			},
-			"log_path": {
-				"type": "string"
-			}
-		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
@@ -26,9 +18,12 @@
 					"value": "@concat('pipeline-log-', formatDateTime(utcNow(),'yyyy-MM-ddTHH-mm-ss'), '.csv')",
 					"type": "Expression"
 				},
-				"folderPath": "@dataset().log_path",
+				"folderPath": {
+					"value": "@pipeline().parameters.log_path",
+					"type": "Expression"
+				},
 				"fileSystem": {
-					"value": "@dataset().log_container",
+					"value": "@pipeline().parameters.log_container",
 					"type": "Expression"
 				}
 			},
