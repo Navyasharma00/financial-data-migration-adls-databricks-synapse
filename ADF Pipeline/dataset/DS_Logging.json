@@ -22,9 +22,15 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "@concat('pipeline-log-', formatDateTime(utcNow(),'yyyy-MM-ddTHH-mm-ss'), '.csv')",
-				"folderPath": "@concat(@dataset().log_path, '/')",
-				"fileSystem": "@dataset().log_container"
+				"fileName": {
+					"value": "@concat('pipeline-log-', formatDateTime(utcNow(),'yyyy-MM-ddTHH-mm-ss'), '.csv')",
+					"type": "Expression"
+				},
+				"folderPath": "@dataset().log_path",
+				"fileSystem": {
+					"value": "@dataset().log_container",
+					"type": "Expression"
+				}
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
