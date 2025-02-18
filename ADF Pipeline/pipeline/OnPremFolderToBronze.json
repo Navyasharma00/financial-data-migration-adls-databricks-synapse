@@ -82,7 +82,10 @@
 						"storeSettings": {
 							"type": "FileServerReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "@pipeline().parameters.source_folder",
+							"wildcardFolderPath": {
+								"value": "@pipeline().parameters.source_folder",
+								"type": "Expression"
+							},
 							"wildcardFileName": {
 								"value": "@pipeline().parameters.file_name",
 								"type": "Expression"
@@ -223,15 +226,24 @@
 						"additionalColumns": [
 							{
 								"name": "pipelineRunId",
-								"value": "@pipeline().RunId"
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
 							},
 							{
 								"name": "pipelineName",
-								"value": "@pipeline().Pipeline"
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
 							},
 							{
 								"name": "runTimestamp",
-								"value": "@utcNow()"
+								"value": {
+									"value": "@utcNow()",
+									"type": "Expression"
+								}
 							}
 						],
 						"storeSettings": {
