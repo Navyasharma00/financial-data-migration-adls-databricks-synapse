@@ -143,10 +143,9 @@
 				"type": "WebActivity",
 				"dependsOn": [
 					{
-						"activity": "Copy_Folder_OnPrem_To_ADLS",
+						"activity": "Copy_Activity_Logs",
 						"dependencyConditions": [
-							"Succeeded",
-							"Skipped"
+							"Succeeded"
 						]
 					}
 				],
@@ -174,7 +173,7 @@
 				"type": "WebActivity",
 				"dependsOn": [
 					{
-						"activity": "Copy_Folder_OnPrem_To_ADLS",
+						"activity": "Copy_Activity_Logs",
 						"dependencyConditions": [
 							"Failed"
 						]
@@ -198,6 +197,121 @@
 						"statusCode": "Failed"
 					}
 				}
+			},
+			{
+				"name": "Copy_Activity_Logs",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy_Folder_OnPrem_To_ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "pipelineRunId",
+								"value": "@pipeline().RunId"
+							},
+							{
+								"name": "pipelineName",
+								"value": "@pipeline().Pipeline"
+							},
+							{
+								"name": "runTimestamp",
+								"value": "@utcNow()"
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "pipelineRunId",
+									"type": "String"
+								},
+								"sink": {
+									"name": "pipelineRunId"
+								}
+							},
+							{
+								"source": {
+									"name": "pipelineName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "pipelineName"
+								}
+							},
+							{
+								"source": {
+									"name": "runTimestamp",
+									"type": "String"
+								},
+								"sink": {
+									"name": "runTimestamp"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Logging",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Logging",
+						"type": "DatasetReference",
+						"parameters": {
+							"log_container": "@pipeline().parameters.log_container",
+							"log_path": {
+								"value": "@pipeline().parameters.log_path",
+								"type": "Expression"
+							}
+						}
+					}
+				]
 			}
 		],
 		"parameters": {
