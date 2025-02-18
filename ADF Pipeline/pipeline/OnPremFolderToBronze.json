@@ -219,6 +219,10 @@
 			"log_path": {
 				"type": "string",
 				"defaultValue": "pipeline-logs"
+			},
+			"log_container": {
+				"type": "string",
+				"defaultValue": "activity-logs"
 			}
 		},
 		"variables": {
