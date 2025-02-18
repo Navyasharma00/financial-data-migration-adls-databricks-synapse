@@ -22,7 +22,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "@concat('pipeline-log-', formatDateTime(utcNow(),'yyyy-MM-ddTHH-mm-ss'), '.csv')",
+				"fileName": "pipeline-log-@utcNow().csv",
 				"folderPath": {
 					"value": "pipeline-logs",
 					"type": "Expression"
