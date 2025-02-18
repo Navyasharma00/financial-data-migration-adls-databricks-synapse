@@ -28,6 +28,7 @@
 					],
 					"storeSettings": {
 						"type": "FileServerReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
 					"formatSettings": {
@@ -49,7 +50,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "varFileCount",
-					"value": "@activity('Get_File_Count_OnPrem').output.itemName"
+					"value": {
+						"value": "@activity('Get_File_Count_OnPrem').output.itemName",
+						"type": "Expression"
+					}
 				}
 			},
 			{
@@ -81,7 +85,10 @@
 								"value": "@pipeline().parameters.source_folder",
 								"type": "Expression"
 							},
-							"wildcardFileName": "@pipeline().parameters.file_name",
+							"wildcardFileName": {
+								"value": "@pipeline().parameters.file_name",
+								"type": "Expression"
+							},
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
@@ -155,6 +162,9 @@
 				"userProperties": [],
 				"typeProperties": {
 					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
 					"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
 					"body": {
 						"status": "Success"
@@ -182,6 +192,9 @@
 				"userProperties": [],
 				"typeProperties": {
 					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
 					"url": "https://prod-17.northcentralus.logic.azure.com:443/workflows/e5375e3fd9374ee396f8ec8fba17077c/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=pmBnbJtuaYOwV_rTZJtUnJV06BdbTwG-g--Tna5uQzA",
 					"body": {
 						"status": "Failed"
