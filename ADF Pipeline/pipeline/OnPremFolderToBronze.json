@@ -81,10 +81,7 @@
 						"storeSettings": {
 							"type": "FileServerReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": {
-								"value": "@pipeline().parameters.source_folder",
-								"type": "Expression"
-							},
+							"wildcardFolderPath": "{   \"value\": \"@concat('\\\\\\\\10.0.0.4\\\\onprem_simulation', '/', pipeline().parameters.source_folder)\",   \"type\": \"Expression\" }",
 							"wildcardFileName": {
 								"value": "@pipeline().parameters.file_name",
 								"type": "Expression"
