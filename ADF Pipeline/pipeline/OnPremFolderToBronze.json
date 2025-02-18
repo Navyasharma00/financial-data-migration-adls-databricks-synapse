@@ -28,6 +28,7 @@
 					],
 					"storeSettings": {
 						"type": "FileServerReadSettings",
+						"skipMissingFiles": true,
 						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
