@@ -115,6 +115,52 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_Logging')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Parametrized",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"log_path": {
+						"type": "string"
+					},
+					"log_container": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat('pipeline-log-', formatDateTime(utcNow(),'yyyy-MM-ddTHH-mm-ss'), '.csv')",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().log_path",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().log_container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Parametrized')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/OnPrem_FileSystem')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -267,7 +313,10 @@
 								"storeSettings": {
 									"type": "FileServerReadSettings",
 									"recursive": true,
-									"wildcardFolderPath": "@pipeline().parameters.source_folder",
+									"wildcardFolderPath": {
+										"value": "@pipeline().parameters.source_folder",
+										"type": "Expression"
+									},
 									"wildcardFileName": {
 										"value": "@pipeline().parameters.file_name",
 										"type": "Expression"
@@ -328,10 +377,9 @@
 						"type": "WebActivity",
 						"dependsOn": [
 							{
-								"activity": "Copy_Folder_OnPrem_To_ADLS",
+								"activity": "Copy_Activity_Logs",
 								"dependencyConditions": [
-									"Succeeded",
-									"Skipped"
+									"Succeeded"
 								]
 							}
 						],
@@ -359,7 +407,7 @@
 						"type": "WebActivity",
 						"dependsOn": [
 							{
-								"activity": "Copy_Folder_OnPrem_To_ADLS",
+								"activity": "Copy_Activity_Logs",
 								"dependencyConditions": [
 									"Failed"
 								]
@@ -383,6 +431,139 @@
 								"statusCode": "Failed"
 							}
 						}
+					},
+					{
+						"name": "Copy_Activity_Logs",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy_Folder_OnPrem_To_ADLS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "pipelineRunId",
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "pipelineName",
+										"value": {
+											"value": "@pipeline().Pipeline",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "runTimestamp",
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"maxConcurrentConnections": 4,
+									"blockSizeInMB": 4
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "pipelineRunId",
+											"type": "String"
+										},
+										"sink": {
+											"name": "pipelineRunId"
+										}
+									},
+									{
+										"source": {
+											"name": "pipelineName",
+											"type": "String"
+										},
+										"sink": {
+											"name": "pipelineName"
+										}
+									},
+									{
+										"source": {
+											"name": "runTimestamp",
+											"type": "String"
+										},
+										"sink": {
+											"name": "runTimestamp"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_Logging",
+								"type": "DatasetReference",
+								"parameters": {
+									"log_container": "@pipeline().parameters.log_container",
+									"log_path": {
+										"value": "@pipeline().parameters.log_path",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_Logging",
+								"type": "DatasetReference",
+								"parameters": {
+									"log_container": "@pipeline().parameters.log_container",
+									"log_path": {
+										"value": "@pipeline().parameters.log_path",
+										"type": "Expression"
+									}
+								}
+							}
+						]
 					}
 				],
 				"policy": {
@@ -405,8 +586,15 @@
 						"defaultValue": "financial-data"
 					},
 					"log_path": {
+						"type": "string"
+					},
+					"log_container": {
 						"type": "string",
-						"defaultValue": "pipeline-logs"
+						"defaultValue": "activity-logs"
+					},
+					"account_name": {
+						"type": "string",
+						"defaultValue": "financialdatalakeproject"
 					}
 				},
 				"variables": {
@@ -418,7 +606,8 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_OnPrem_Raw')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Bronze')]"
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Bronze')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Logging')]"
 			]
 		}
 	]
