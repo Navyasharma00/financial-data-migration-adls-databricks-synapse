@@ -1,0 +1,32 @@
+{
+	"name": "DS_Logging",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_Parametrized",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"log_container": {
+				"type": "string"
+			},
+			"log_path": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "@concat('pipeline-log-', utcNow(), '.csv')",
+				"folderPath": "@dataset().log_path",
+				"fileSystem": "@dataset().log_container"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
