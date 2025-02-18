@@ -223,6 +223,10 @@
 			"log_container": {
 				"type": "string",
 				"defaultValue": "activity-logs"
+			},
+			"account_name": {
+				"type": "string",
+				"defaultValue": "financialdatalakeproject"
 			}
 		},
 		"variables": {
