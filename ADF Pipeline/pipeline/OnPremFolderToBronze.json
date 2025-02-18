@@ -296,7 +296,14 @@
 				"inputs": [
 					{
 						"referenceName": "DS_Logging",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"log_container": "@pipeline().parameters.log_container",
+							"log_path": {
+								"value": "@pipeline().parameters.log_path",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"outputs": [
