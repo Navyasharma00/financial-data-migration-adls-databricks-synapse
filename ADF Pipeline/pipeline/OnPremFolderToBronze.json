@@ -338,8 +338,7 @@
 				"defaultValue": "financial-data"
 			},
 			"log_path": {
-				"type": "string",
-				"defaultValue": "pipeline-logs"
+				"type": "string"
 			},
 			"log_container": {
 				"type": "string",
