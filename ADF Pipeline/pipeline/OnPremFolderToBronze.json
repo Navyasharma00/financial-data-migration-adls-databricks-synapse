@@ -178,8 +178,6 @@
 			{
 				"name": "Web_Failure_LogicApp",
 				"type": "WebActivity",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_Folder_OnPrem_To_ADLS",
