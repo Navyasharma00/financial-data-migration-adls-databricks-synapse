@@ -121,7 +121,11 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_ADLS_Parametrized",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"account_name": "@pipeline().parameters.account_name",
+						"container_name": "@pipeline().parameters.log_container"
+					}
 				},
 				"parameters": {
 					"log_path": {
@@ -236,6 +240,8 @@
 					{
 						"name": "Get_File_Count_OnPrem",
 						"type": "GetMetadata",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -480,6 +486,8 @@
 								"storeSettings": {
 									"type": "AzureBlobFSReadSettings",
 									"recursive": true,
+									"wildcardFolderPath": "pipeline-logs",
+									"wildcardFileName": "pipeline-log-*.csv",
 									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
@@ -586,7 +594,8 @@
 						"defaultValue": "financial-data"
 					},
 					"log_path": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "pipeline-logs"
 					},
 					"log_container": {
 						"type": "string",
