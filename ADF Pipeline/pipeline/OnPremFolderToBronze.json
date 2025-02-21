@@ -42,8 +42,6 @@
 			{
 				"name": "Append_File_Count",
 				"type": "AppendVariable",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Get_File_Count_OnPrem",
@@ -64,8 +62,6 @@
 			{
 				"name": "Copy_Folder_OnPrem_To_ADLS",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Append_File_Count",
@@ -150,8 +146,6 @@
 			{
 				"name": "Web_Success_LogicApp",
 				"type": "WebActivity",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_Activity_Logs",
@@ -182,8 +176,6 @@
 			{
 				"name": "Web_Failure_LogicApp",
 				"type": "WebActivity",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_Activity_Logs",
