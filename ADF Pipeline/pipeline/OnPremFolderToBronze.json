@@ -82,6 +82,10 @@
 						"storeSettings": {
 							"type": "FileServerReadSettings",
 							"recursive": true,
+							"modifiedDatetimeStart": {
+								"value": "@variables('varLastModifiedDate')",
+								"type": "Expression"
+							},
 							"wildcardFolderPath": {
 								"value": "@pipeline().parameters.source_folder",
 								"type": "Expression"
