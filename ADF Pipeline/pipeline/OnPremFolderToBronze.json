@@ -62,7 +62,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Store_Last_Modified_Date",
+						"activity": "Append_File_Count",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -210,7 +210,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "varLastModifiedDate",
+						"activity": "Copy_Folder_OnPrem_To_ADLS",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -339,86 +339,6 @@
 						}
 					}
 				]
-			},
-			{
-				"name": "Get_Last_Modified_OnPrem",
-				"type": "GetMetadata",
-				"dependsOn": [
-					{
-						"activity": "Append_File_Count",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "DS_OnPrem_Raw",
-						"type": "DatasetReference",
-						"parameters": {
-							"source_folder": "@pipeline().parameters.source_folder",
-							"file_name": "@pipeline().parameters.file_name"
-						}
-					},
-					"fieldList": [
-						"lastModified"
-					],
-					"storeSettings": {
-						"type": "FileServerReadSettings",
-						"enablePartitionDiscovery": false
-					},
-					"formatSettings": {
-						"type": "DelimitedTextReadSettings"
-					}
-				}
-			},
-			{
-				"name": "Store_Last_Modified_Date",
-				"type": "AppendVariable",
-				"dependsOn": [
-					{
-						"activity": "Get_Last_Modified_OnPrem",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "varLastModifiedDate",
-					"value": "@activity('Get_Last_Modified_OnPrem').output.lastModified"
-				}
-			},
-			{
-				"name": "varLastModifiedDate",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "Copy_Folder_OnPrem_To_ADLS",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "varLastModifiedDate",
-					"value": [
-						"@utcNow()"
-					]
-				}
 			}
 		],
 		"parameters": {
@@ -452,9 +372,6 @@
 		},
 		"variables": {
 			"varFileCount": {
-				"type": "Array"
-			},
-			"varLastModifiedDate": {
 				"type": "Array"
 			}
 		},
