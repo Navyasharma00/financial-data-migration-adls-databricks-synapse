@@ -364,6 +364,7 @@
 						"referenceName": "DS_OnPrem_Raw",
 						"type": "DatasetReference",
 						"parameters": {
+							"source_folder": "@pipeline().parameters.source_folder",
 							"file_name": "*.csv"
 						}
 					},
