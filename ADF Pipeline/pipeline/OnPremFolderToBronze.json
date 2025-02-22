@@ -62,7 +62,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Get_Last_Modified_OnPrem",
+						"activity": "Store_Last_Modified_Date",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -374,6 +374,19 @@
 						"type": "DelimitedTextReadSettings"
 					}
 				}
+			},
+			{
+				"name": "Store_Last_Modified_Date",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Get_Last_Modified_OnPrem",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": []
 			}
 		],
 		"parameters": {
@@ -407,6 +420,9 @@
 		},
 		"variables": {
 			"varFileCount": {
+				"type": "Array"
+			},
+			"varLastModifiedDate": {
 				"type": "Array"
 			}
 		},
