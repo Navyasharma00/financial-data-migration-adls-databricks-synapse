@@ -5,8 +5,6 @@
 			{
 				"name": "Get_File_Count_OnPrem",
 				"type": "GetMetadata",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
