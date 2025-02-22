@@ -210,7 +210,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Copy_Folder_OnPrem_To_ADLS",
+						"activity": "varLastModifiedDate",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -394,6 +394,29 @@
 				"typeProperties": {
 					"variableName": "varLastModifiedDate",
 					"value": "@activity('Get_Last_Modified_OnPrem').output.lastModified"
+				}
+			},
+			{
+				"name": "varLastModifiedDate",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Copy_Folder_OnPrem_To_ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "varLastModifiedDate",
+					"value": [
+						"@utcNow()"
+					]
 				}
 			}
 		],
