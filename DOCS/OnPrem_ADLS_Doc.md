@@ -58,16 +58,16 @@ This document provides a detailed overview of the **On-Premises to ADLS Data Pip
 Below are key screenshots capturing the pipeline execution, Logic App workflow, and monitoring dashboards.
 
 ### ✅ **Logic App Designer (Success & Failure Conditions)**
-![Logic App Designer](Logicappdesigner.png)
+![Logic App Designer](../project_artifacts/Logicappdesigner.png)
 
 ### ✅ **Logic App Run History (Showing Successful Execution)**
-![Logic App Run History](LogicApprunhistory.png)
+![Logic App Run History](../project_artifacts/LogicApprunhistory.png)
 
 ### ✅ **Azure Data Factory Pipeline Run (Success)**
-![ADF Pipeline Run](ADFPipelinerun.png)
+![ADF Pipeline Run](../project_artifacts/ADFPipelinerun.png)
 
 ### ✅ **Azure Data Factory Log File (CSV Doc preview within ADLS)**
-![Log File Created](Logfilecreated.png)
+![Log File Created](../project_artifacts/Logfilecreated.png)
 
 ---
 
