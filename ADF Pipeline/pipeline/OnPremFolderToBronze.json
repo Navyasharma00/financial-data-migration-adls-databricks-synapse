@@ -62,7 +62,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Append_File_Count",
+						"activity": "Get_Last_Modified_OnPrem",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -335,6 +335,45 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "Get_Last_Modified_OnPrem",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Append_File_Count",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_OnPrem_Raw",
+						"type": "DatasetReference",
+						"parameters": {
+							"file_name": "*.csv"
+						}
+					},
+					"fieldList": [
+						"lastModified"
+					],
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
 			}
 		],
 		"parameters": {
