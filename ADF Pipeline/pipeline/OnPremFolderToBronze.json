@@ -386,7 +386,11 @@
 						]
 					}
 				],
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "varLastModifiedDate",
+					"value": "@activity('Get_Last_Modified_OnPrem').output.lastModified"
+				}
 			}
 		],
 		"parameters": {
