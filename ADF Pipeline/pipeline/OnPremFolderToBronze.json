@@ -365,7 +365,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"source_folder": "@pipeline().parameters.source_folder",
-							"file_name": "*.csv"
+							"file_name": "@pipeline().parameters.file_name"
 						}
 					},
 					"fieldList": [
